@@ -11,8 +11,16 @@ let explosionFrame = 0;
 // Flappy Bird sprite
 const birdImg = new Image();
 birdImg.src = 'bird.png';
+
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
 
 
 
@@ -21,10 +29,10 @@ let frames = 0;
 const DEGREE = Math.PI/180;
 
 const bird = {
-    x: 50,
+    x: 150, // meer naar rechts
     y: 150,
-    w: 48, // groter
-    h: 34, // groter
+    w: 48 * 1.25, // 1.25x origineel
+    h: 34 * 1.25, // 1.25x origineel
     gravity: 0.18, // minder snel vallen
     jump: 5.2,     // iets krachtiger sprong
     velocity: 0,
@@ -53,7 +61,7 @@ const pipes = [];
 const pipeWidth = 52;
 const pipeGap = 170; // grotere opening
 let pipeTimer = 0;
-const pipeInterval = 120; // pijpen komen minder vaak
+const pipeInterval = 180; // pijpen komen nog minder vaak
 
 function addPipe() {
     const top = Math.random() * (canvas.height - pipeGap - 100) + 50;
