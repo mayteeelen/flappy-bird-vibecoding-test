@@ -1,3 +1,7 @@
+
+// Flappy Bird sprite
+const birdImg = new Image();
+birdImg.src = 'bird.png';
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -10,17 +14,13 @@ const DEGREE = Math.PI/180;
 const bird = {
     x: 50,
     y: 150,
-    radius: 12,
+    w: 34,
+    h: 24,
     gravity: 0.25,
     jump: 4.6,
     velocity: 0,
     draw() {
-        ctx.fillStyle = '#ff0';
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-        ctx.fill();
-        ctx.strokeStyle = '#000';
-        ctx.stroke();
+        ctx.drawImage(birdImg, this.x - this.w/2, this.y - this.h/2, this.w, this.h);
     },
     flap() {
         this.velocity = -this.jump;
@@ -28,13 +28,13 @@ const bird = {
     update() {
         this.velocity += this.gravity;
         this.y += this.velocity;
-        if (this.y + this.radius > canvas.height) {
-            this.y = canvas.height - this.radius;
+        if (this.y + this.h/2 > canvas.height) {
+            this.y = canvas.height - this.h/2;
             this.velocity = 0;
             gameOver = true;
         }
-        if (this.y - this.radius < 0) {
-            this.y = this.radius;
+        if (this.y - this.h/2 < 0) {
+            this.y = this.h/2;
             this.velocity = 0;
         }
     }
@@ -77,12 +77,20 @@ function updatePipes() {
 
 function checkCollision() {
     for (let pipe of pipes) {
-        if (
-            bird.x + bird.radius > pipe.x &&
-            bird.x - bird.radius < pipe.x + pipeWidth &&
-            (bird.y - bird.radius < pipe.top || bird.y + bird.radius > pipe.bottom)
-        ) {
-            return true;
+        // Bird bounding box
+        const birdLeft = bird.x - bird.w/2;
+        const birdRight = bird.x + bird.w/2;
+        const birdTop = bird.y - bird.h/2;
+        const birdBottom = bird.y + bird.h/2;
+        // Pipe bounding boxes
+        const pipeLeft = pipe.x;
+        const pipeRight = pipe.x + pipeWidth;
+        // Check horizontal overlap
+        if (birdRight > pipeLeft && birdLeft < pipeRight) {
+            // Check vertical collision with top or bottom pipe
+            if (birdTop < pipe.top || birdBottom > pipe.bottom) {
+                return true;
+            }
         }
     }
     return false;
