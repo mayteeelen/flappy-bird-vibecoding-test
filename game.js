@@ -1,21 +1,34 @@
 
 // Sound management
-const flapSound = document.getElementById('flapSound');
-const crashSound = document.getElementById('crashSound');
-const soundToggle = document.getElementById('soundToggle');
+const flapSound = new Audio('sound_flap.mp3');
+const crashSound = new Audio('sound_crash.mp3');
 let soundEnabled = true;
 
-// Sound toggle functionality
-soundToggle.addEventListener('click', function() {
-    soundEnabled = !soundEnabled;
-    soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
-    soundToggle.classList.toggle('muted', !soundEnabled);
+// Preload sounds
+flapSound.load();
+crashSound.load();
+
+// Sound toggle functionality - set up after DOM loads
+document.addEventListener('DOMContentLoaded', function() {
+    const soundToggle = document.getElementById('soundToggle');
+    if (soundToggle) {
+        soundToggle.addEventListener('click', function(e) {
+            e.stopPropagation(); // Prevent triggering flap
+            soundEnabled = !soundEnabled;
+            soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
+            soundToggle.classList.toggle('muted', !soundEnabled);
+        });
+    }
 });
 
 function playSound(sound) {
-    if (soundEnabled && sound) {
-        sound.currentTime = 0; // Reset to start
+    if (!soundEnabled || !sound) return;
+
+    try {
+        sound.currentTime = 0;
         sound.play().catch(e => console.log('Sound play failed:', e));
+    } catch (e) {
+        console.log('Sound error:', e);
     }
 }
 
@@ -74,10 +87,11 @@ const bird = {
     update() {
         this.velocity += this.gravity;
         this.y += this.velocity;
+        // Ground and ceiling bounds are checked in the main game loop
+        // to ensure crash sound plays properly
         if (this.y + this.h/2 > canvas.height) {
             this.y = canvas.height - this.h/2;
             this.velocity = 0;
-            // Note: crash sound is played in the main game loop collision detection
         }
         if (this.y - this.h/2 < 0) {
             this.y = this.h/2;
@@ -340,5 +354,6 @@ canvas.addEventListener('touchstart', function(e) {
 
 // Start het spel pas als de achtergrond geladen is
 bgImg.onload = function() {
+    initAudio();
     gameLoop();
 };
