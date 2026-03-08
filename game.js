@@ -14,10 +14,10 @@ const DEGREE = Math.PI/180;
 const bird = {
     x: 50,
     y: 150,
-    w: 34,
-    h: 24,
-    gravity: 0.25,
-    jump: 4.6,
+    w: 48, // groter
+    h: 34, // groter
+    gravity: 0.18, // minder snel vallen
+    jump: 5.2,     // iets krachtiger sprong
     velocity: 0,
     draw() {
         ctx.drawImage(birdImg, this.x - this.w/2, this.y - this.h/2, this.w, this.h);
@@ -42,8 +42,9 @@ const bird = {
 
 const pipes = [];
 const pipeWidth = 52;
-const pipeGap = 120;
+const pipeGap = 170; // grotere opening
 let pipeTimer = 0;
+const pipeInterval = 120; // pijpen komen minder vaak
 
 function addPipe() {
     const top = Math.random() * (canvas.height - pipeGap - 100) + 50;
@@ -55,12 +56,27 @@ function addPipe() {
 }
 
 function drawPipes() {
-    ctx.fillStyle = '#0f0';
     pipes.forEach(pipe => {
         // Top pipe
-        ctx.fillRect(pipe.x, 0, pipeWidth, pipe.top);
+        ctx.save();
+        ctx.fillStyle = '#bbb';
+        ctx.strokeStyle = '#222';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.rect(pipe.x, 0, pipeWidth, pipe.top);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
         // Bottom pipe
-        ctx.fillRect(pipe.x, pipe.bottom, pipeWidth, canvas.height - pipe.bottom);
+        ctx.save();
+        ctx.fillStyle = '#bbb';
+        ctx.strokeStyle = '#222';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.rect(pipe.x, pipe.bottom, pipeWidth, canvas.height - pipe.bottom);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
     });
 }
 
@@ -96,13 +112,18 @@ function checkCollision() {
     return false;
 }
 
+
 let score = 0;
+let lives = 3;
 let gameOver = false;
 
 function drawScore() {
     ctx.fillStyle = '#000';
     ctx.font = '32px Arial';
     ctx.fillText(score, 20, 50);
+    // Levens
+    ctx.font = '24px Arial';
+    ctx.fillText('Levens: ' + lives, 20, 80);
 }
 
 function resetGame() {
@@ -110,18 +131,34 @@ function resetGame() {
     bird.velocity = 0;
     pipes.length = 0;
     score = 0;
+    lives = 3;
     gameOver = false;
     pipeTimer = 0;
 }
+
 
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     bird.draw();
     if (!gameOver) {
         bird.update();
-        if (++pipeTimer % 90 === 0) addPipe();
+        if (++pipeTimer % pipeInterval === 0) addPipe();
         updatePipes();
-        if (checkCollision()) gameOver = true;
+        // Botsing of vallen
+        let collision = checkCollision();
+        let outOfBounds = (bird.y + bird.h/2 > canvas.height) || (bird.y - bird.h/2 < 0);
+        if (collision || outOfBounds) {
+            lives--;
+            if (lives > 0) {
+                // Zet vogel terug naar startpositie en snelheid
+                bird.y = 150;
+                bird.velocity = 0;
+                // Schuif alle pijpen verder naar rechts zodat je tijd krijgt
+                pipes.forEach(pipe => { pipe.x += 120; });
+            } else {
+                gameOver = true;
+            }
+        }
     }
     drawPipes();
     drawScore();
@@ -130,9 +167,9 @@ function gameLoop() {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = '#fff';
         ctx.font = '48px Arial';
-        ctx.fillText('Game Over', 80, 300);
+        ctx.fillText('Game Over', 180, 300);
         ctx.font = '24px Arial';
-        ctx.fillText('Press Space to Restart', 70, 350);
+        ctx.fillText('Press Space to Restart', 170, 350);
     }
     requestAnimationFrame(gameLoop);
 }
