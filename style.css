@@ -7,6 +7,7 @@ body {
     margin: 0;
     overflow: hidden;
     touch-action: manipulation;
+    position: relative;
 }
 /* Canvas vult scherm op mobiel, behoudt verhouding */
 #gameCanvas {
@@ -20,4 +21,37 @@ body {
     height: 100vh;
     margin: 0 auto;
     touch-action: manipulation;
+}
+
+/* Sound toggle button */
+.sound-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 3px solid #000;
+    background: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    transition: all 0.2s ease;
+}
+
+.sound-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.sound-toggle:active {
+    transform: scale(0.95);
+}
+
+.sound-toggle.muted {
+    background: #ddd;
 }

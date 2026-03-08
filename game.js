@@ -1,4 +1,23 @@
 
+// Sound management
+const flapSound = document.getElementById('flapSound');
+const crashSound = document.getElementById('crashSound');
+const soundToggle = document.getElementById('soundToggle');
+let soundEnabled = true;
+
+// Sound toggle functionality
+soundToggle.addEventListener('click', function() {
+    soundEnabled = !soundEnabled;
+    soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
+    soundToggle.classList.toggle('muted', !soundEnabled);
+});
+
+function playSound(sound) {
+    if (soundEnabled && sound) {
+        sound.currentTime = 0; // Reset to start
+        sound.play().catch(e => console.log('Sound play failed:', e));
+    }
+}
 
 // Jungle achtergrond
 const bgImg = new Image();
@@ -50,6 +69,7 @@ const bird = {
     },
     flap() {
         this.velocity = -this.jump;
+        playSound(flapSound);
     },
     update() {
         this.velocity += this.gravity;
@@ -57,7 +77,7 @@ const bird = {
         if (this.y + this.h/2 > canvas.height) {
             this.y = canvas.height - this.h/2;
             this.velocity = 0;
-            gameOver = true;
+            // Note: crash sound is played in the main game loop collision detection
         }
         if (this.y - this.h/2 < 0) {
             this.y = this.h/2;
@@ -272,6 +292,7 @@ function gameLoop() {
             lives--;
             exploding = true;
             explosionFrame = 0;
+            playSound(crashSound);
             return requestAnimationFrame(gameLoop);
         }
     }
