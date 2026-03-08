@@ -354,6 +354,5 @@ canvas.addEventListener('touchstart', function(e) {
 
 // Start het spel pas als de achtergrond geladen is
 bgImg.onload = function() {
-    initAudio();
     gameLoop();
 };
