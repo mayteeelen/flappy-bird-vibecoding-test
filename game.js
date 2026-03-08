@@ -1,9 +1,7 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-// Load Flappy Bird sprite
-const birdImg = new Image();
-birdImg.src = 'bird.png';
+
 
 // Game variables
 let frames = 0;
@@ -12,13 +10,17 @@ const DEGREE = Math.PI/180;
 const bird = {
     x: 50,
     y: 150,
-    w: 34,
-    h: 24,
+    radius: 12,
     gravity: 0.25,
     jump: 4.6,
     velocity: 0,
     draw() {
-        ctx.drawImage(birdImg, this.x - this.w/2, this.y - this.h/2, this.w, this.h);
+        ctx.fillStyle = '#ff0';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.strokeStyle = '#000';
+        ctx.stroke();
     },
     flap() {
         this.velocity = -this.jump;
@@ -26,13 +28,13 @@ const bird = {
     update() {
         this.velocity += this.gravity;
         this.y += this.velocity;
-        if (this.y + this.h/2 > canvas.height) {
-            this.y = canvas.height - this.h/2;
+        if (this.y + this.radius > canvas.height) {
+            this.y = canvas.height - this.radius;
             this.velocity = 0;
             gameOver = true;
         }
-        if (this.y - this.h/2 < 0) {
-            this.y = this.h/2;
+        if (this.y - this.radius < 0) {
+            this.y = this.radius;
             this.velocity = 0;
         }
     }
