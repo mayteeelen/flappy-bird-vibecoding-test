@@ -4,7 +4,7 @@
 const bgImg = new Image();
 bgImg.src = 'jungle.png';
 let bgX = 0;
-const bgScrollSpeed = 0.7;
+const bgScrollSpeed = 2; // zelfde snelheid als pijpen
 
 let exploding = false;
 let explosionFrame = 0;
@@ -33,8 +33,8 @@ const bird = {
     y: 150,
     w: 48 * 1.25, // 1.25x origineel
     h: 34 * 1.25, // 1.25x origineel
-    gravity: 0.18, // minder snel vallen
-    jump: 5.2,     // iets krachtiger sprong
+        gravity: 0.12, // nog minder snel vallen
+        jump: 5.7,     // nog krachtiger sprong
     velocity: 0,
     draw() {
         ctx.drawImage(birdImg, this.x - this.w/2, this.y - this.h/2, this.w, this.h);
@@ -59,9 +59,9 @@ const bird = {
 
 const pipes = [];
 const pipeWidth = 52;
-const pipeGap = 170; // grotere opening
+const pipeGap = bird.h * 6; // nog grotere opening voor de vogel
 let pipeTimer = 0;
-const pipeInterval = 180; // pijpen komen nog minder vaak
+const pipeInterval = 320; // pijpen komen veel minder vaak
 
 function addPipe() {
     const top = Math.random() * (canvas.height - pipeGap - 100) + 50;
@@ -73,6 +73,7 @@ function addPipe() {
 }
 
 function drawPipes() {
+    const rim = 14; // breedte van de rand
     pipes.forEach(pipe => {
         // Top pipe
         ctx.save();
@@ -83,6 +84,10 @@ function drawPipes() {
         ctx.rect(pipe.x, 0, pipeWidth, pipe.top);
         ctx.fill();
         ctx.stroke();
+        // Flens bovenkant (links en rechts breder)
+        ctx.fillStyle = '#888';
+        ctx.fillRect(pipe.x - rim, pipe.top - rim, pipeWidth + 2 * rim, rim);
+        ctx.strokeRect(pipe.x - rim, pipe.top - rim, pipeWidth + 2 * rim, rim);
         ctx.restore();
         // Bottom pipe
         ctx.save();
@@ -93,6 +98,10 @@ function drawPipes() {
         ctx.rect(pipe.x, pipe.bottom, pipeWidth, canvas.height - pipe.bottom);
         ctx.fill();
         ctx.stroke();
+        // Flens onderkant (links en rechts breder)
+        ctx.fillStyle = '#888';
+        ctx.fillRect(pipe.x - rim, pipe.bottom, pipeWidth + 2 * rim, rim);
+        ctx.strokeRect(pipe.x - rim, pipe.bottom, pipeWidth + 2 * rim, rim);
         ctx.restore();
     });
 }
@@ -114,7 +123,7 @@ function drawExplosion(x, y, frame) {
 
 function updatePipes() {
     pipes.forEach(pipe => {
-        pipe.x -= 2;
+        pipe.x -= bgScrollSpeed; // pijpen bewegen even snel als achtergrond
     });
     // Remove pipes that are off screen
     if (pipes.length && pipes[0].x + pipeWidth < 0) {
