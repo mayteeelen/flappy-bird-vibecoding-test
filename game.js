@@ -15,12 +15,21 @@ birdImg.src = 'bird.png';
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
+
 function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    // Houd canvas vullend, maar behoud landscape verhouding indien gewenst
+    let w = window.innerWidth;
+    let h = window.innerHeight;
+    // Optioneel: forceer landscape verhouding op mobiel
+    // if (w < h) h = w * 1.5;
+    canvas.width = w;
+    canvas.height = h;
 }
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
+
+// Extra: op mobiel, resize bij orientation change
+window.addEventListener('orientationchange', resizeCanvas);
 
 
 
@@ -289,6 +298,8 @@ document.addEventListener('keydown', function(e) {
         }
     }
 });
+
+// Touch controls voor mobiel
 canvas.addEventListener('mousedown', function() {
     if (gameOver) {
         resetGame();
@@ -296,6 +307,14 @@ canvas.addEventListener('mousedown', function() {
         bird.flap();
     }
 });
+canvas.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    if (gameOver) {
+        resetGame();
+    } else {
+        bird.flap();
+    }
+}, { passive: false });
 
 
 // Start het spel pas als de achtergrond geladen is

@@ -5,9 +5,19 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
+    overflow: hidden;
+    touch-action: manipulation;
 }
+/* Canvas vult scherm op mobiel, behoudt verhouding */
 #gameCanvas {
     background: #fff;
     border: 3px solid #000;
     box-shadow: none;
+    display: block;
+    max-width: 100vw;
+    max-height: 100vh;
+    width: 100vw;
+    height: 100vh;
+    margin: 0 auto;
+    touch-action: manipulation;
 }
