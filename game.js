@@ -1,4 +1,13 @@
 
+
+// Jungle achtergrond
+const bgImg = new Image();
+bgImg.src = 'jungle.png';
+let bgX = 0;
+const bgScrollSpeed = 0.7;
+
+let exploding = false;
+let explosionFrame = 0;
 // Flappy Bird sprite
 const birdImg = new Image();
 birdImg.src = 'bird.png';
@@ -80,6 +89,21 @@ function drawPipes() {
     });
 }
 
+function drawExplosion(x, y, frame) {
+    // Simpele cirkel-explosie animatie
+    for (let i = 0; i < 8; i++) {
+        const angle = (Math.PI * 2 / 8) * i;
+        const r = 10 + frame * 3;
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(x + Math.cos(angle) * r, y + Math.sin(angle) * r, 6 + frame, 0, 2 * Math.PI);
+        ctx.fillStyle = frame % 2 === 0 ? '#ff0' : '#f00';
+        ctx.globalAlpha = 1 - frame / 10;
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
 function updatePipes() {
     pipes.forEach(pipe => {
         pipe.x -= 2;
@@ -88,6 +112,35 @@ function updatePipes() {
     if (pipes.length && pipes[0].x + pipeWidth < 0) {
         pipes.shift();
         score++;
+        if (exploding) {
+            // Teken explosie op vogelpositie
+            drawExplosion(bird.x, bird.y, explosionFrame);
+            explosionFrame++;
+            if (explosionFrame > 10) {
+                exploding = false;
+                if (lives <= 0) {
+                    gameOver = true;
+                } else {
+                    // Reset vogel
+                    bird.y = 150;
+                    bird.velocity = 0;
+                    pipes.forEach(pipe => { pipe.x += 120; });
+                }
+            }
+            drawPipes();
+            drawScore();
+            if (gameOver) {
+                ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#fff';
+                ctx.font = '48px Arial';
+                ctx.fillText('Game Over', 180, 300);
+                ctx.font = '24px Arial';
+                ctx.fillText('Press Space to Restart', 170, 350);
+            }
+            requestAnimationFrame(gameLoop);
+            return;
+        }
     }
 }
 
@@ -118,11 +171,19 @@ let lives = 3;
 let gameOver = false;
 
 function drawScore() {
-    ctx.fillStyle = '#000';
+    // Score
     ctx.font = '32px Arial';
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 4;
+    ctx.strokeText(score, 20, 50);
+    ctx.fillStyle = '#fff';
     ctx.fillText(score, 20, 50);
     // Levens
     ctx.font = '24px Arial';
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 4;
+    ctx.strokeText('Levens: ' + lives, 20, 80);
+    ctx.fillStyle = '#fff';
     ctx.fillText('Levens: ' + lives, 20, 80);
 }
 
@@ -139,6 +200,40 @@ function resetGame() {
 
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Scrollende achtergrond
+    bgX -= bgScrollSpeed;
+    if (bgX <= -canvas.width) bgX = 0;
+    ctx.drawImage(bgImg, bgX, 0, canvas.width, canvas.height);
+    ctx.drawImage(bgImg, bgX + canvas.width, 0, canvas.width, canvas.height);
+
+    if (exploding) {
+        drawExplosion(bird.x, bird.y, explosionFrame);
+        explosionFrame++;
+        drawPipes();
+        drawScore();
+        if (explosionFrame > 10) {
+            exploding = false;
+            if (lives <= 0) {
+                gameOver = true;
+            } else {
+                bird.y = 150;
+                bird.velocity = 0;
+                pipes.forEach(pipe => { pipe.x += 120; });
+            }
+        }
+        if (gameOver) {
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#fff';
+            ctx.font = '48px Arial';
+            ctx.fillText('Game Over', 180, 300);
+            ctx.font = '24px Arial';
+            ctx.fillText('Press Space to Restart', 170, 350);
+        }
+        requestAnimationFrame(gameLoop);
+        return;
+    }
+
     bird.draw();
     if (!gameOver) {
         bird.update();
@@ -149,15 +244,9 @@ function gameLoop() {
         let outOfBounds = (bird.y + bird.h/2 > canvas.height) || (bird.y - bird.h/2 < 0);
         if (collision || outOfBounds) {
             lives--;
-            if (lives > 0) {
-                // Zet vogel terug naar startpositie en snelheid
-                bird.y = 150;
-                bird.velocity = 0;
-                // Schuif alle pijpen verder naar rechts zodat je tijd krijgt
-                pipes.forEach(pipe => { pipe.x += 120; });
-            } else {
-                gameOver = true;
-            }
+            exploding = true;
+            explosionFrame = 0;
+            return requestAnimationFrame(gameLoop);
         }
     }
     drawPipes();
@@ -191,4 +280,8 @@ canvas.addEventListener('mousedown', function() {
     }
 });
 
-gameLoop();
+
+// Start het spel pas als de achtergrond geladen is
+bgImg.onload = function() {
+    gameLoop();
+};
